@@ -63,7 +63,11 @@ namespace BrianReiter.Notification
 					message.Subject = subjectTemplate;
 					message.Body = bodyTemplate;
 					message.From = fromAddress;
-                    message.IsBodyHtml = IsBodyHtml;
+                    if (IsBodyHtml)
+                    {
+                        message.BodyEncoding = System.Text.Encoding.UTF8;
+                        message.IsBodyHtml = IsBodyHtml;
+                    }
 					try
 					{  
 						message.To.Add( new MailAddress(line) );
