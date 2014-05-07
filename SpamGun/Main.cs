@@ -21,7 +21,6 @@ namespace BrianReiter.Notification
 				{ "f|from=", "Required: Email address to send from.", x => fromAddress = x },
 				{ "n|from-name=", "Optional: Friendly {FROM-NAME} of the sender.", x => fromName = x },
 				{ "whatif", "Process the data file and args but send no email.", x => whatif = (x != null) },
-				{ "html", "Change the body type to html.", x => html = (x != null) },
 				{ "?|help", "Show this message and exit.", x=> help = (x != null) }
 			};
 
