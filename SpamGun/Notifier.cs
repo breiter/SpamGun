@@ -67,6 +67,7 @@ namespace BrianReiter.Notification
                     {
                         message.BodyEncoding = System.Text.Encoding.UTF8;
                         message.IsBodyHtml = IsBodyHtml;
+                        message.Headers.Add("Content-Type", "text/html");
                     }
 					try
 					{  
