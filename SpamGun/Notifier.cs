@@ -9,32 +9,34 @@ namespace BrianReiter.Notification
 	public class Notifier
 	{
 		public FileInfo BodyFile { get; set; }
+        public FileInfo HtmlBodyFile { get; set; }
 		public FileInfo SubjectFile { get; set; }
 		public FileInfo DataFile { get; set; }
 		public string FromEmail { get; set; }
 		public string FromName { get; set; }
         public bool WhatIf { get; set; }
-        public bool IsBodyHtml { get; set; }
 
 		public Notifier() { WhatIf = false; }
 		public Notifier( OptionInfo options ) : this()
 		{
-			BodyFile = new FileInfo( options.BodyPath );
+            BodyFile = new FileInfo(options.BodyPath);
+            HtmlBodyFile = new FileInfo(options.HtmlBodyPath);
 			SubjectFile = new FileInfo( options.SubjectPath );
 			DataFile = new FileInfo( options.DataPath );
 			FromEmail = options.FromEmail;
 
 			FromName = options.FromName;
-            IsBodyHtml = options.IsBodyHtml;
 		}
 
 		public void Send( TextWriter output )
 		{
-			string bodyTemplate, subjectTemplate;
+			string bodyTemplate, htmlBodyTemplate, subjectTemplate;
 			using( var bodyReader = BodyFile.OpenText() )
 			{ bodyTemplate = bodyReader.ReadToEnd(); }
-			using( var subjectReader = SubjectFile.OpenText() )
-			{ subjectTemplate = subjectReader.ReadToEnd(); }
+            using (var htmlBodyReader = HtmlBodyFile.OpenText())
+            { htmlBodyTemplate = htmlBodyReader.ReadToEnd(); }
+            using (var subjectReader = SubjectFile.OpenText())
+            { subjectTemplate = subjectReader.ReadToEnd(); }
 			MailAddress fromAddress;
 			if( !string.IsNullOrEmpty( FromName ) )
 			{
@@ -63,16 +65,10 @@ namespace BrianReiter.Notification
 					message.Subject = subjectTemplate;
 					message.Body = bodyTemplate;
 					message.From = fromAddress;
-                    if (IsBodyHtml)
-                    {
-                        message.BodyEncoding = System.Text.Encoding.UTF8;
-                        message.IsBodyHtml = IsBodyHtml;
-
-                        ContentType mimeType = new System.Net.Mime.ContentType("text/html");
-                        // Add the alternate body to the message.
-                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(bodyTemplate, mimeType);
-                        message.AlternateViews.Add(alternate);
-                    }
+                    ContentType mimeType = new System.Net.Mime.ContentType("text/html");
+                    // Add the alternate body to the message.
+                    AlternateView alternate = AlternateView.CreateAlternateViewFromString(htmlBodyTemplate, mimeType);
+                    message.AlternateViews.Add(alternate);
 					try
 					{  
 						message.To.Add( new MailAddress(line) );
