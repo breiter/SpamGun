@@ -67,7 +67,11 @@ namespace BrianReiter.Notification
                     {
                         message.BodyEncoding = System.Text.Encoding.UTF8;
                         message.IsBodyHtml = IsBodyHtml;
-                        message.Headers.Add("Content-Type", "text/html");
+
+                        ContentType mimeType = new System.Net.Mime.ContentType("text/html");
+                        // Add the alternate body to the message.
+                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(bodyTemplate, mimeType);
+                        message.AlternateViews.Add(alternate);
                     }
 					try
 					{  
