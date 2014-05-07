@@ -20,7 +20,9 @@ namespace BrianReiter.Notification
 		public Notifier( OptionInfo options ) : this()
 		{
             BodyFile = new FileInfo(options.BodyPath);
-            HtmlBodyFile = new FileInfo(options.HtmlBodyPath);
+            HtmlBodyFile = null;
+            if (!String.IsNullOrEmpty(options.HtmlBodyPath))
+                HtmlBodyFile = new FileInfo(options.HtmlBodyPath);
 			SubjectFile = new FileInfo( options.SubjectPath );
 			DataFile = new FileInfo( options.DataPath );
 			FromEmail = options.FromEmail;
@@ -30,11 +32,14 @@ namespace BrianReiter.Notification
 
 		public void Send( TextWriter output )
 		{
-			string bodyTemplate, htmlBodyTemplate, subjectTemplate;
+			string bodyTemplate, htmlBodyTemplate = null, subjectTemplate;
 			using( var bodyReader = BodyFile.OpenText() )
 			{ bodyTemplate = bodyReader.ReadToEnd(); }
-            using (var htmlBodyReader = HtmlBodyFile.OpenText())
-            { htmlBodyTemplate = htmlBodyReader.ReadToEnd(); }
+            if (HtmlBodyFile != null)
+            {
+                using (var htmlBodyReader = HtmlBodyFile.OpenText())
+                { htmlBodyTemplate = htmlBodyReader.ReadToEnd(); }
+            }
             using (var subjectReader = SubjectFile.OpenText())
             { subjectTemplate = subjectReader.ReadToEnd(); }
 			MailAddress fromAddress;
@@ -65,10 +70,13 @@ namespace BrianReiter.Notification
 					message.Subject = subjectTemplate;
 					message.Body = bodyTemplate;
 					message.From = fromAddress;
-                    ContentType mimeType = new System.Net.Mime.ContentType("text/html");
-                    // Add the alternate body to the message.
-                    AlternateView alternate = AlternateView.CreateAlternateViewFromString(htmlBodyTemplate, mimeType);
-                    message.AlternateViews.Add(alternate);
+                    if (!String.IsNullOrEmpty(htmlBodyTemplate))
+                    {
+                        ContentType mimeType = new System.Net.Mime.ContentType("text/html");
+                        // Add the alternate body to the message.
+                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(htmlBodyTemplate, mimeType);
+                        message.AlternateViews.Add(alternate);
+                    }
 					try
 					{  
 						message.To.Add( new MailAddress(line) );

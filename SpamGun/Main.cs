@@ -14,8 +14,8 @@ namespace BrianReiter.Notification
 			bool help, whatif = false, html = false;
 			var p = new OptionSet()
 			{
-				{ "b|body=", "Required: Email {BODY} HTML template path.", x => bodyPath = x },
-				{ "h|html=", "Required: Email {BODY} HTML template path.", x => htmlBodyPath = x },
+				{ "b|body=", "Required: Email {BODY} TEXT template path.", x => bodyPath = x },
+				{ "h|html=", "Optional: Email {BODY} HTML template path.", x => htmlBodyPath = x },
 				{ "s|subject=", "Required: Email {SUBJECT} TXT file template path.", x => subjectPath = x },
 				{ "d|data=", "Required: Email merge {DATA} TSV file path.", x => dataPath = x },
 				{ "f|from=", "Required: Email address to send from.", x => fromAddress = x },
