@@ -11,15 +11,16 @@ namespace BrianReiter.Notification
 		{ 
 			string bodyPath = null, subjectPath = null, dataPath = null;
 			string fromAddress = null, fromName = null;
-			bool help, whatif = false;
+			bool help, whatif = false, html = false;
 			var p = new OptionSet()
 			{
 				{ "b|body=", "Required: Email {BODY} HTML template path.", x => bodyPath = x },
 				{ "s|subject=", "Required: Email {SUBJECT} TXT file template path.", x => subjectPath = x },
 				{ "d|data=", "Required: Email merge {DATA} TSV file path.", x => dataPath = x },
 				{ "f|from=", "Required: Email address to send from.", x => fromAddress = x },
-				{ "n|from-name=", "Optiional: Friendly {FROM-NAME} of the sender.", x => fromName = x },
+				{ "n|from-name=", "Optional: Friendly {FROM-NAME} of the sender.", x => fromName = x },
 				{ "whatif", "Process the data file and args but send no email.", x => whatif = (x != null) },
+				{ "html", "Change the body type to html.", x => html = (x != null) },
 				{ "?|help", "Show this message and exit.", x=> help = (x != null) }
 			};
 
@@ -37,7 +38,8 @@ namespace BrianReiter.Notification
 				SubjectPath = subjectPath,
 				DataPath = dataPath,
 				FromEmail = fromAddress,
-				FromName = fromName
+				FromName = fromName,
+                IsBodyHtml = html
 			};
 
 			var notifier = new Notifier( options ) { WhatIf = whatif } ;

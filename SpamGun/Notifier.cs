@@ -13,7 +13,8 @@ namespace BrianReiter.Notification
 		public FileInfo DataFile { get; set; }
 		public string FromEmail { get; set; }
 		public string FromName { get; set; }
-		public bool WhatIf { get; set; }
+        public bool WhatIf { get; set; }
+        public bool IsBodyHtml { get; set; }
 
 		public Notifier() { WhatIf = false; }
 		public Notifier( OptionInfo options ) : this()
@@ -24,6 +25,7 @@ namespace BrianReiter.Notification
 			FromEmail = options.FromEmail;
 
 			FromName = options.FromName;
+            IsBodyHtml = options.IsBodyHtml;
 		}
 
 		public void Send( TextWriter output )
@@ -61,6 +63,7 @@ namespace BrianReiter.Notification
 					message.Subject = subjectTemplate;
 					message.Body = bodyTemplate;
 					message.From = fromAddress;
+                    message.IsBodyHtml = IsBodyHtml;
 					try
 					{  
 						message.To.Add( new MailAddress(line) );

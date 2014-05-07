@@ -8,6 +8,7 @@ namespace BrianReiter.Notification
         public string DataPath { get; set; }
         public string FromEmail { get; set; }
         public string FromName { get; set; }
+        public bool IsBodyHtml { get; set; }
     }
 }
 
