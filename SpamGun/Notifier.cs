@@ -81,7 +81,7 @@ namespace BrianReiter.Notification
                     {
                         ContentType mimeType = new System.Net.Mime.ContentType("text/html");
                         // Add the alternate body to the message.
-                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(htmlBodyTemplate, mimeType);
+                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(string.Format(htmlBodyTemplate, name), mimeType);
                         message.AlternateViews.Add(alternate);
                     }
 					try
