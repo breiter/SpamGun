@@ -16,7 +16,7 @@ namespace BrianReiter.Notification
 		public string FromName { get; set; }
         public bool WhatIf { get; set; }
 
-		public Notifier() { WhatIf = false; }
+        public Notifier() { WhatIf = false; }
 		public Notifier( OptionInfo options ) : this()
 		{
             BodyFile = new FileInfo(options.BodyPath);
@@ -58,17 +58,24 @@ namespace BrianReiter.Notification
 				if( WhatIf )
 				{ output.WriteLine( "*** WhatIf mode. No messages will be sent. ***" ); }
 
-				string line;
+				string line, name;
 				long lineNumber = 0;
 				while( null != (line = dataReader.ReadLine()) )
 				{
 					lineNumber++;
 					line = line.Trim();
+                    name = "Applicant";
 					if( line == string.Empty || line.StartsWith( "#" ) ) { continue ; }
 
 					var message = new MailMessage();
+                    if (line.Contains("\t")) 
+                    {
+                        var fields = line.Split('\t');
+                        line = fields[0];
+                        name = !String.IsNullOrEmpty(fields[1]) ? fields[1] : "Applicant";
+                    }
 					message.Subject = subjectTemplate;
-					message.Body = bodyTemplate;
+                    message.Body = string.Format(bodyTemplate, name);
 					message.From = fromAddress;
                     if (!String.IsNullOrEmpty(htmlBodyTemplate))
                     {
