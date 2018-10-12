@@ -57,7 +57,7 @@ namespace BrianReiter.Notification
 
 		static void ShowHelp( OptionSet p )
 		{
-			Console.WriteLine( "Usage: [mono] SpamGun.exe OPTIONS+" );
+			Console.WriteLine( "Usage: dotnet SpamGun.dll OPTIONS+" );
 			Console.WriteLine( "SpamGun notifier. Merges subject text and body HTML with TSV data file." );
 
 			Console.WriteLine( "SpamGun.exe version {0}.",
