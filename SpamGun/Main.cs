@@ -2,6 +2,7 @@ using Mono.Options;
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Extensions.Configuration;
 
 namespace BrianReiter.Notification
 {
@@ -11,7 +12,7 @@ namespace BrianReiter.Notification
 		{ 
 			string bodyPath = null, htmlBodyPath = null,subjectPath = null, dataPath = null;
 			string fromAddress = null, fromName = null;
-			bool help, whatif = false, html = false;
+			bool help, whatif = false;
 			var p = new OptionSet()
 			{
 				{ "b|body=", "Required: Email {BODY} TEXT template path.", x => bodyPath = x },
@@ -22,6 +23,7 @@ namespace BrianReiter.Notification
 				{ "n|from-name=", "Optional: Friendly {FROM-NAME} of the sender.", x => fromName = x },
 				{ "whatif", "Process the data file and args but send no email.", x => whatif = (x != null) },
 				{ "?|help", "Show this message and exit.", x=> help = (x != null) }
+				
 			};
 
 			p.Parse( args );
@@ -42,7 +44,14 @@ namespace BrianReiter.Notification
 				FromName = fromName
 			};
 
-			var notifier = new Notifier( options ) { WhatIf = whatif } ;
+			IConfigurationBuilder builder = new ConfigurationBuilder();
+			builder.AddJsonFile("appsettings.json")
+				.AddEnvironmentVariables()
+				.AddCommandLine(args);
+			IConfiguration configuration = builder.Build();
+
+
+			var notifier = new Notifier( configuration, options ) { WhatIf = whatif } ;
 			notifier.Send( Console.Out );
 		}
 

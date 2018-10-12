@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace BrianReiter.Notification
 {
@@ -16,9 +17,12 @@ namespace BrianReiter.Notification
 		public string FromName { get; set; }
         public bool WhatIf { get; set; }
 
+		protected IConfiguration Configuration { get; set; }
+		protected SmtpClientFactory SmtpClientFactory => new SmtpClientFactory(Configuration);
         public Notifier() { WhatIf = false; }
-		public Notifier( OptionInfo options ) : this()
+		public Notifier( IConfiguration configuration, OptionInfo options ) : this()
 		{
+			Configuration = configuration;
             BodyFile = new FileInfo(options.BodyPath);
             HtmlBodyFile = null;
             if (!String.IsNullOrEmpty(options.HtmlBodyPath))
@@ -41,7 +45,7 @@ namespace BrianReiter.Notification
                 { htmlBodyTemplate = htmlBodyReader.ReadToEnd(); }
             }
             using (var subjectReader = SubjectFile.OpenText())
-            { subjectTemplate = subjectReader.ReadToEnd(); }
+            { subjectTemplate = subjectReader.ReadLine(); }
 			MailAddress fromAddress;
 			if( !string.IsNullOrEmpty( FromName ) )
 			{
@@ -51,7 +55,7 @@ namespace BrianReiter.Notification
 			{
 				fromAddress = new MailAddress( FromEmail );
 			}
-			var smtpClient = new SmtpClient();
+			var smtpClient = SmtpClientFactory.NewSmtpClient();
 
 			using( var dataReader = DataFile.OpenText() )
 			{
