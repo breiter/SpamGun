@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net.Mail;
 using System.Net.Mime;
-using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 
 namespace BrianReiter.Notification
@@ -62,13 +62,14 @@ namespace BrianReiter.Notification
 				if( WhatIf )
 				{ output.WriteLine( "*** WhatIf mode. No messages will be sent. ***" ); }
 
-				string line, name;
+				string line;
+				string[] formatParameters;
 				long lineNumber = 0;
 				while( null != (line = dataReader.ReadLine()) )
 				{
 					lineNumber++;
 					line = line.Trim();
-                    name = "Applicant";
+                    formatParameters = new string[] {};
 					if( line == string.Empty || line.StartsWith( "#" ) ) { continue ; }
 
 					var message = new MailMessage();
@@ -76,16 +77,16 @@ namespace BrianReiter.Notification
                     {
                         var fields = line.Split('\t');
                         line = fields[0];
-                        name = !String.IsNullOrEmpty(fields[1]) ? fields[1] : "Applicant";
+                        formatParameters = fields.Skip(1).ToArray();
                     }
 					message.Subject = subjectTemplate;
-                    message.Body = string.Format(bodyTemplate, name);
+                    message.Body = string.Format(bodyTemplate, formatParameters);
 					message.From = fromAddress;
                     if (!String.IsNullOrEmpty(htmlBodyTemplate))
                     {
                         ContentType mimeType = new System.Net.Mime.ContentType("text/html");
                         // Add the alternate body to the message.
-                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(string.Format(htmlBodyTemplate, name), mimeType);
+                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(string.Format(htmlBodyTemplate, formatParameters), mimeType);
                         message.AlternateViews.Add(alternate);
                     }
 					try
