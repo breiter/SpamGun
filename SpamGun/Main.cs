@@ -53,7 +53,8 @@ namespace BrianReiter.Notification
 
 
             var notifier = new Notifier( configuration, options ) { WhatIf = whatif } ;
-            Task.Run(async () => await notifier.SendAsync(Console.Out));
+            var notificationTask = Task.Run(async () => await notifier.SendAsync(Console.Out));
+            notificationTask.Wait();
         }
 
         static void ShowHelp(OptionSet p)
