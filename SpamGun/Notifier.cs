@@ -1,9 +1,10 @@
 using System;
 using System.IO;
-using System.Net.Mail;
-using System.Net.Mime;
+using MimeKit;
+using MailKit.Net.Smtp;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace BrianReiter.Notification
 {
@@ -18,7 +19,7 @@ namespace BrianReiter.Notification
         public bool WhatIf { get; set; }
 
 		protected IConfiguration Configuration { get; set; }
-		protected SmtpClientFactory SmtpClientFactory => new SmtpClientFactory(Configuration);
+		protected SmtpClientService SmtpClient => new SmtpClientService(Configuration);
         public Notifier() { WhatIf = false; }
 		public Notifier( IConfiguration configuration, OptionInfo options ) : this()
 		{
@@ -34,7 +35,7 @@ namespace BrianReiter.Notification
 			FromName = options.FromName;
 		}
 
-		public void Send( TextWriter output )
+		public async Task SendAsync(TextWriter output)
 		{
 			string bodyTemplate, htmlBodyTemplate = null, subjectTemplate;
 			using( var bodyReader = BodyFile.OpenText() )
@@ -46,18 +47,10 @@ namespace BrianReiter.Notification
             }
             using (var subjectReader = SubjectFile.OpenText())
             { subjectTemplate = subjectReader.ReadLine(); }
-			MailAddress fromAddress;
-			if( !string.IsNullOrEmpty( FromName ) )
-			{
-				fromAddress = new MailAddress( FromEmail, FromName );
-			}
-			else 
-			{
-				fromAddress = new MailAddress( FromEmail );
-			}
-			var smtpClient = SmtpClientFactory.NewSmtpClient();
+			MailboxAddress fromAddress = new MailboxAddress(FromName, FromEmail);
 
-			using( var dataReader = DataFile.OpenText() )
+
+			using(var dataReader = DataFile.OpenText())
 			{
 				if( WhatIf )
 				{ output.WriteLine( "*** WhatIf mode. No messages will be sent. ***" ); }
@@ -71,26 +64,30 @@ namespace BrianReiter.Notification
                     name = "Applicant";
 					if( line == string.Empty || line.StartsWith( "#" ) ) { continue ; }
 
-					var message = new MailMessage();
+					var message = new MimeMessage();
                     if (line.Contains("\t")) 
                     {
                         var fields = line.Split('\t');
                         line = fields[0];
                         name = !String.IsNullOrEmpty(fields[1]) ? fields[1] : "Applicant";
                     }
+
+                    message.From.Add(fromAddress);
 					message.Subject = subjectTemplate;
-                    message.Body = string.Format(bodyTemplate, name);
-					message.From = fromAddress;
+					var builder = new BodyBuilder()
+					{
+						TextBody = string.Format(bodyTemplate, name)
+					};
+
                     if (!String.IsNullOrEmpty(htmlBodyTemplate))
                     {
-                        ContentType mimeType = new System.Net.Mime.ContentType("text/html");
-                        // Add the alternate body to the message.
-                        AlternateView alternate = AlternateView.CreateAlternateViewFromString(string.Format(htmlBodyTemplate, name), mimeType);
-                        message.AlternateViews.Add(alternate);
+						builder.HtmlBody = string.Format(htmlBodyTemplate, name);
                     }
+
+					message.Body = builder.ToMessageBody();
 					try
 					{  
-						message.To.Add( new MailAddress(line) );
+						message.To.Add(new MailboxAddress(name:null, address:line));
 
 						if( WhatIf )
 						{
@@ -98,7 +95,7 @@ namespace BrianReiter.Notification
 						}
 						else
 						{
-							smtpClient.Send( message );
+							await SmtpClient.SendMessageAsync(message);
 							output.WriteLine( "Line {0}: Notification sent to \"{1}\".", lineNumber, line);
 						}
 					}

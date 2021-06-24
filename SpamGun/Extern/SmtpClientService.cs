@@ -10,10 +10,6 @@ namespace MailKit.Net.Smtp
     {
         IConfiguration Configuration { get; }
 
-        public MailboxAddress SystemFromAddress => new MailboxAddress(
-            name: Configuration.GetValue<string>("Mail:System:FromName"),
-            address: Configuration.GetValue<string>("Mail:System:FromAddress")
-        );
         string SmtpHost => Configuration.GetValue<string>("Mail:Smtp:Host", "localhost");
         int SmtpPort => Configuration.GetValue<int>("Mail:Smtp:Port", 25);
         SecureSocketOptions SmtpSecureSocketOptions => Configuration.GetValue<SecureSocketOptions>("Mail:Smtp:SecureSocketOptions", SecureSocketOptions.Auto);
