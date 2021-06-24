@@ -54,7 +54,9 @@ namespace BrianReiter.Notification
 
             var notifier = new Notifier( configuration, options ) { WhatIf = whatif } ;
             var notificationTask = Task.Run(async () => await notifier.SendAsync(Console.Out));
+            Console.WriteLine("Waiting for mail sessions to complete.");
             notificationTask.Wait();
+            Console.WriteLine("done.");
         }
 
         static void ShowHelp(OptionSet p)
