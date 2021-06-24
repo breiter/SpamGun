@@ -9,7 +9,7 @@ namespace BrianReiter.Notification
 {
     public class MainClass
     {
-        public static void Main (string[] args)
+        public static async Task Main (string[] args)
         { 
             string bodyPath = null, htmlBodyPath = null,subjectPath = null, dataPath = null;
             string fromAddress = null, fromName = null;
@@ -53,10 +53,8 @@ namespace BrianReiter.Notification
 
 
             var notifier = new Notifier( configuration, options ) { WhatIf = whatif } ;
-            var notificationTask = Task.Run(async () => await notifier.SendAsync(Console.Out));
-            Console.WriteLine("Waiting for mail sessions to complete.");
-            notificationTask.Wait();
-            Console.WriteLine("done.");
+            await notifier.SendAsync(Console.Out);
+            Console.WriteLine("Done.");
         }
 
         static void ShowHelp(OptionSet p)
